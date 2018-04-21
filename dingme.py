@@ -1,35 +1,20 @@
 # Wensheng Wang @2018
 
 # run pep8 with:
-#   "flake8 --max-line-length=100 sync2.py"
+#   "flake8 --max-line-length=100 dingme.py"
 
 import sys
 import os
-import shutil
-import filecmp
-import hashlib
-import threading
 
 import wx
 import wx.adv
 
-STOP_ON_ERROR = False  # we don't stop on error
-# Button definitions
-ID_START = wx.NewId()
-ID_STOP = wx.NewId()
-
-# Define notification event for thread completion
-EVT_RESULT_ID = wx.NewId()
-
-
-def EVT_RESULT(win, func):
-    """Define Result Event."""
-    win.Connect(-1, -1, eVT_RESULT_ID, func)
 
 def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
     base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
     return os.path.join(base_path, relative_path)
+
 
 class MyFrame(wx.Frame):
     def __init__(self, parent, id, title):
@@ -42,6 +27,7 @@ class MyFrame(wx.Frame):
         self.Bind(wx.EVT_TIMER, self.OnTimer)
 
         self.counter = 0
+        self.alarmed = 0
         self.counting = False
 
         self.sound = wx.adv.Sound(resource_path("winForeground.wav"))
@@ -62,17 +48,17 @@ class MyFrame(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.On10, id=2)
         self.Bind(wx.EVT_BUTTON, self.On25, id=3)
         self.Bind(wx.EVT_BUTTON, self.On60, id=4)
-        # self.txt1 = wx.TextCtrl(panel, size=(110, 20), pos=(100, 125), style=wx.TE_READONLY)
         self.txt1 = wx.TextCtrl(panel, size=(80, 40), pos=(130, 100))
         self.txt1.SetFont(wx.Font(24, wx.DECORATIVE, wx.NORMAL, wx.BOLD))
+        self.txt1.SetValue("25")
+        self.txt1.SetFocus()
 
         self.doButton = wx.Button(panel, 5, 'SET', (126, 160))
         self.Bind(wx.EVT_BUTTON, self.DoIt, id=5)
         self.txt3 = wx.TextCtrl(panel,
                                 size=(315, 50),
                                 pos=(10, 200),
-                                style=wx.TE_READONLY | wx.BORDER_NONE)
-        #                        style=wx.TE_READONLY | wx.BORDER_NONE | wx.ALIGN_CENTER_VERTICAL)
+                                style=wx.TE_READONLY | wx.TE_RICH | wx.BORDER_NONE)
         self.txt3.SetFont(wx.Font(16, wx.SWISS, wx.NORMAL, wx.NORMAL))
         self.txt3.SetValue("")
 
@@ -84,8 +70,22 @@ class MyFrame(wx.Frame):
             self.counter -= 1
             mins = self.counter // 60
             secs = self.counter % 60
-            self.txt3.SetValue("%d minutes %d seconds" % (mins, secs))
+            if mins < 2:
+                minu = "minute"
+            else:
+                minu = "minutes"
+            if secs < 2:
+                secu = "second"
+            else:
+                secu = "seconds"
+            self.txt3.SetValue("%d %s %d %s" % (mins, minu, secs, secu))
         else:
+            self.alarmed += 1
+            if self.alarmed % 2:
+                self.txt3.SetForegroundColour(wx.RED)
+            else:
+                self.txt3.SetForegroundColour(wx.BLACK)
+            self.txt3.SetValue("Time's up!")
             self.sound.Play()
 
     def ResetDoButton(self):
@@ -106,6 +106,7 @@ class MyFrame(wx.Frame):
 
     def DoIt(self, event):
         self.txt3.SetValue("")
+        self.alarmed = 0
 
         if self.counting:
             self.counter = 0
@@ -115,6 +116,7 @@ class MyFrame(wx.Frame):
             self.m10Button.Enable()
             self.m25Button.Enable()
             self.m60Button.Enable()
+            self.txt1.Enable()
             return
 
         try:
@@ -131,12 +133,14 @@ class MyFrame(wx.Frame):
         self.m10Button.Disable()
         self.m25Button.Disable()
         self.m60Button.Disable()
+        self.txt1.Disable()
         self.doButton.SetLabel("STOP")
         self.counting = True
 
+
 class MyApp(wx.App):
     def OnInit(self):
-        frame = MyFrame(None, -1, 'sync2')
+        frame = MyFrame(None, -1, 'dingme')
         frame.Show(True)
         frame.Centre()
         return True

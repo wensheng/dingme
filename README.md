@@ -2,7 +2,7 @@
 
 dingme is a simple alarm clock.
 
-Just download [dingme.zip](https://github.com/wensheng/dingme/releases/download/0.1/dingme.zip), extract and run dingme.exe.
+Just download [dingme.zip](https://github.com/wensheng/dingme/releases/download/v1.0/dingme.zip), extract and run dingme.exe.
 
 <img src="imgs/screenshot.png" width=400 />
 
@@ -38,6 +38,7 @@ No.  But it's open-source,  you can package it yourself.  Or you can just take d
 9999 (about a week)
 
 7. Can I request (feature, preset, sound to be added)?
+
 No
 
 
